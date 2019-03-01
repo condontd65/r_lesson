@@ -48,6 +48,8 @@ write.csv(bpda, 'bpda2.csv', row.names = FALSE)
 
 You can access google sheets and import them as tables in R using the **googlesheets** package. This also allows you to upload to Google Sheets.
 
+This method involves manually authenticating your google account in a browser so it is less useful than setting up a password/username but is more secure for sharing online.
+
 ```{r googlesheets, eval=FALSE}
 # Install and load googlesheeets package and tidyverse package
 install.packages('googlesheets') 
@@ -93,7 +95,7 @@ R can also access SQL servers to import tables using several packages. Today we'
 
 You'll need to have Windows Authentication access to the database on the computer you're using to make this specific method work.
 
-```{r sql}
+```{r sql, eval=FALSE}
 # Install and load RODBC
 install.packages('RODBC')
 library(RODBC)
