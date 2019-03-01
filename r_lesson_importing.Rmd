@@ -1,0 +1,132 @@
+---
+title: "Importing Data into R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CSV
+
+CSVs are one of the most common ways to bring data into R. R makes it easy by including a base function **read.csv()**.
+
+The basic structure of the function is simply *read.csv(filepath)*. Be sure to save this function to a variable in R using **<-**.
+
+```{r read csv, eval=FALSE}
+# Read in the bpda addresses csv
+bpda <- read.csv('bpda_addresses.csv')
+
+# View to first 6 rows of bpda
+head(bpda)
+```
+
+Add a zero at the beginning of the ZIP column using string padding. This is a neat trick you may need to use since we live in Boston and frequently zeros get dropped at the beginning of our zip codes if we're not careful.
+
+```{r fix zip, eval=FALSE}
+# Install and load stringi package
+install.packages('stringi')
+library(stringi)
+
+# Pad the ZIP column with a 0 up to the fifth digit
+bpda$ZIP <- stri_pad(bpda$ZIP, 5, pad = '0')
+
+# View the same rows as before, notice ZIP now correctly includes the 0 at the beginning and is no longer an integer
+head(bpda)
+```
+
+You can then write data back to csv using **write.csv**. The basic function structure is *write.csv(table, filepath)*.
+
+```{r write csv, eval=FALSE}
+# Write bpda back to csv
+write.csv(bpda, 'bpda2.csv', row.names = FALSE)
+
+```
+
+
+## Google Sheets
+
+You can access google sheets and import them as tables in R using the **googlesheets** package. This also allows you to upload to Google Sheets.
+
+```{r googlesheets, eval=FALSE}
+# Install and load googlesheeets package and tidyverse package
+install.packages('googlesheets') 
+install.packages('tidyverse')
+
+library(googlesheets)
+library(tidyverse)
+
+# Set up Google Sheet authorization
+gs_auth(new_user = TRUE)
+
+# Check available sheets
+gs_ls()
+available <- gs_ls()
+
+# View available sheets in console
+View(available)
+
+# Read in Stairs Tracker to see how good James is at climbing stairs
+stairs.title <- gs_title('Stairs Tracker')
+stairs <- gs_read(stairs.title)
+view(stairs)
+```
+
+Now we want to only keep records that were made by James since he is the wunderkind of Competitive Stair Climbing and everyone else pales in comparison. We can then export this table to CSV and upload it to Google Sheets.
+
+```{r remove plebs and upload, eval=FALSE}
+# Keep only rows that contain James and put them in new table
+stairs.wunderkind <- stairs [ stairs$Name == 'James', ]
+
+# Write to a CSV as you did before
+write.csv(stairs.wunderkind, 'stairs_wunderkind.csv', row.names = FALSE)
+
+# Upload this CSV to a Google Sheet
+gs_upload('stairs_wunderkind.csv',
+          sheet_title = 'Stairs Tracker for the Only Person Who Uses It')
+
+```
+
+## SQL Server Access
+
+R can also access SQL servers to import tables using several packages. Today we'll be using **RODBC** to do this. 
+
+You'll need to have Windows Authentication access to the database on the computer you're using to make this specific method work.
+
+```{r sql}
+# Install and load RODBC
+install.packages('RODBC')
+library(RODBC)
+
+# Set up the connection
+con <- odbcDriverConnect('driver={SQL Server}; server=vsql25; database=EDW_Generic; trusted_connection=true')
+
+# Write the query
+query <- "SELECT * FROM dbo.DOIT_CraigslistData WHERE bedrooms = '1BR'"
+
+# Utilize the query
+craigslist.1br <- sqlQuery(con, query)
+view(craigslist.1br)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
